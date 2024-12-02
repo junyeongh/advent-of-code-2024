@@ -1,47 +1,41 @@
 use std::collections::HashMap;
-use std::fs;
-use std::io;
+use std::{fs, io};
 use std::iter::zip;
 
 fn main() -> io::Result<()> {
-    let contents = fs::read_to_string("src/day1/test")?;
-    // let contents = fs::read_to_string("src/day1/input")?;
+    // let contents = fs::read_to_string("src/day1/test.txt")?;
+    let contents = fs::read_to_string("src/day1/input.txt")?;
 
-    let mut left_list: Vec<i32> = vec![];
-    let mut right_list: Vec<i32> = vec![];
-    for line in contents.lines() {
-        let mut nums = line.split_ascii_whitespace();
-        if let (Some(left), Some(right)) = (nums.next(), nums.next()) {
-            if let Ok(left_num) = left.parse::<i32>() {
-                left_list.push(left_num);
+    let (left_list, right_list): (Vec<i32>, Vec<i32>) = contents
+        .lines()
+        .filter_map(|line| {
+            let mut nums = line.split_ascii_whitespace();
+            if let (Some(left), Some(right)) = (nums.next(), nums.next()) {
+                if let (Ok(left_num), Ok(right_num)) = (left.parse::<i32>(), right.parse::<i32>()) {
+                    return Some((left_num, right_num));
+                }
             }
-            if let Ok(right_num) = right.parse::<i32>() {
-                right_list.push(right_num);
-            }
-        }
-    }
+            None
+        })
+        .unzip();
 
     let mut left_sorted_list = left_list.clone();
     left_sorted_list.sort();
     let mut right_sorted_list = right_list.clone();
     right_sorted_list.sort();
 
-    let pair: Vec<(i32, i32)> = zip(left_sorted_list, right_sorted_list)
-        .into_iter()
-        .collect();
+    let pair: Vec<(i32, i32)> = zip(left_sorted_list, right_sorted_list).collect();
 
     // part 1
-    let sum: i32 = pair.iter().map(|v| (v.0 - v.1).abs()).sum();
-    println!("{:?}", sum);
+    let distance: i32 = pair.iter().map(|(l, r)| (l - r).abs()).sum();
+    println!("{:?}", distance);
 
     // part 2
-    let mut counter: HashMap<i32, i32> = HashMap::new();
-    for number in right_list {
-        *counter.entry(number).or_insert(0) += 1;
-    }
-    let score: i32 = left_list
-        .iter()
-        .fold(0, |acc, &v| acc + v * counter.get(&v).unwrap_or(&0));
+    let counter: HashMap<i32, i32> = right_list.iter().fold(HashMap::new(), |mut acc, &num| {
+        *acc.entry(num).or_insert(0) += 1;
+        acc
+    });
+    let score: i32 = left_list.iter().map(|&v| v * counter.get(&v).unwrap_or(&0)).sum();
     println!("{:?}", score);
 
     Ok(())
