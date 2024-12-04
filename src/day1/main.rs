@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::{fs, io};
 use std::iter::zip;
+use std::{fs, io};
 
 fn main() -> io::Result<()> {
     // let contents = fs::read_to_string("src/day1/test.txt")?;
@@ -35,7 +35,10 @@ fn main() -> io::Result<()> {
         *acc.entry(num).or_insert(0) += 1;
         acc
     });
-    let score: i32 = left_list.iter().map(|&v| v * counter.get(&v).unwrap_or(&0)).sum();
+    let score: i32 = left_list
+        .iter()
+        .map(|&v| v * counter.get(&v).unwrap_or(&0))
+        .sum();
     println!("{:?}", score);
 
     Ok(())
